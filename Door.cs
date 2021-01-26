@@ -4,15 +4,31 @@ using UnityEngine;
 
 public class Door : MonoBehaviour
 {
+    [Header("Door Properties")]
     public bool isOpen;
     public bool isLocked;
-    public float degrees = 90;
-    public float speed = 10f;
-    public float range = 5;
-    public Camera player;
-    public float totalTime = 6f;
-    public Transform pivot;
 
+    [Header("Hinge Properties")]
+    public float totalTime = 4f;
+    public Transform pivot;
+    public float degrees = 90;
+    public float speed = 3.5f;
+
+    [Header("Raycast Properties")]
+    public Camera player;
+    public float range = 3.77f;
+    
+    [Header("Audio Clips")]
+    public AudioSource closeDoorSource;
+    public AudioSource openDoorSource;
+    public AudioClip open_door;
+    public AudioClip close_door;
+
+    void Start()
+    {
+        closeDoorSource = GetComponent<AudioSource>();
+        openDoorSource = GetComponent<AudioSource>();
+    }
     void Update()
     {
         RaycastHit hit;
@@ -22,7 +38,8 @@ public class Door : MonoBehaviour
             if(Input.GetKeyDown(KeyCode.E) && !isOpen)
             {
                 Debug.Log("open door");
-                
+
+                openDoorSource.PlayOneShot(open_door);
                 StartCoroutine(OpenDoor());
 
             }
@@ -33,6 +50,7 @@ public class Door : MonoBehaviour
                     Debug.Log("close door");
 
                     StartCoroutine(CloseDoor());
+                    closeDoorSource.PlayOneShot(close_door);
                 }
             }
         }
