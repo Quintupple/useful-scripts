@@ -4,91 +4,49 @@ using UnityEngine;
 
 public class Door : MonoBehaviour
 {
-    [Header("Door Properties")]
-    public bool isOpen;
-    public bool isLocked;
+    public AudioSource openSource;
+    public AudioSource closeSource;
+    public AudioClip door_openAudio;
+    public AudioClip door_closeAudio;
+    public AudioClip doorLockedSound;
+    public Animator doorAnim;
+    public bool doorOpen = false;
+    public bool isLocked = false;
+    public bool hasUnlocked = false;
+    public bool hasKey = false;
 
-    [Header("Hinge Properties")]
-    public float totalTime = 4f;
-    public Transform pivot;
-    public float degrees = 90;
-    public float speed = 3.5f;
+    [Header("Pause Timer")]
+    [SerializeField] private int waitTimer = 1;
+    [SerializeField] private bool pauseInteraction = false;
 
-    [Header("Raycast Properties")]
-    public Camera player;
-    public float range = 3.77f;
-    
-    [Header("Audio Clips")]
-    public AudioSource closeDoorSource;
-    public AudioSource openDoorSource;
-    public AudioClip open_door;
-    public AudioClip close_door;
-
-    void Start()
+    void Awake()
     {
-        closeDoorSource = GetComponent<AudioSource>();
-        openDoorSource = GetComponent<AudioSource>();
+        doorAnim = gameObject.GetComponent<Animator>();
     }
-    void Update()
+
+    public void PlayAnim()
     {
-        RaycastHit hit;
-
-        if(Physics.Raycast(player.transform.position, player.transform.forward, out hit, range))
+        if(!doorOpen && !pauseInteraction)
         {
-            if(Input.GetKeyDown(KeyCode.E) && !isOpen)
-            {
-                Debug.Log("open door");
-
-                openDoorSource.PlayOneShot(open_door);
-                StartCoroutine(OpenDoor());
-
-            }
-            else
-            {
-                if(Input.GetKeyDown(KeyCode.E) && isOpen)
-                {
-                    Debug.Log("close door");
-
-                    StartCoroutine(CloseDoor());
-                    closeDoorSource.PlayOneShot(close_door);
-                }
-            }
+            doorAnim.Play("door_open");
+            AudioSource.PlayClipAtPoint(door_openAudio, transform.position);
+            doorOpen = true;
+            StartCoroutine(PauseInteraction());
         }
-    }
-    
-    IEnumerator OpenDoor()
-    {
-        float elapsedTime = 3;
-        while (elapsedTime < totalTime)
+        else if(doorOpen && !pauseInteraction)
         {
-            Vector3 openDoor = new Vector3(0, degrees, 0);
-
-            pivot.transform.eulerAngles = Vector3.Lerp(transform.rotation.eulerAngles, openDoor, Time.deltaTime * speed);
-            elapsedTime += Time.deltaTime;
-
-            isOpen = true;
-            yield return null;
+            doorAnim.Play("door_close");
+            AudioSource.PlayClipAtPoint(door_closeAudio, transform.position);
+            doorOpen = false;
+            StartCoroutine(PauseInteraction());
         }
     }
 
-    IEnumerator CloseDoor()
+    public IEnumerator PauseInteraction()
     {
-        float elapsedTime = 3;
-        while (elapsedTime < totalTime)
-        {
-            Vector3 closeDoor = new Vector3(0, 0, 0);
+        pauseInteraction = true;
+        yield return new WaitForSeconds(waitTimer);
+        pauseInteraction = false;
 
-            pivot.transform.eulerAngles = Vector3.Lerp(transform.rotation.eulerAngles, closeDoor, Time.deltaTime * speed);
-            elapsedTime += Time.deltaTime;
-
-            isOpen = false;
-            yield return null;
-        }
-    }
-
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(player.transform.position, range);
     }
 }
