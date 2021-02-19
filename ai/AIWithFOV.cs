@@ -23,13 +23,13 @@ public class AIWithFOV : MonoBehaviour
 
     [Header("Bools, Floats and Stuff")]
     public bool facePlayer;
-	public bool alreadyAttacked;
+    public bool alreadyAttacked;
     public bool isInAttack;
     public float waitTime;
     public float timeBetweenAttacks = 3f;
 
     [Header("Assign Stuff")]
-	public GameObject projectile;
+    public GameObject projectile;
     public LayerMask whatIsPlayer;
 
     private void Start()
